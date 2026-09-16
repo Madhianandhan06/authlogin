@@ -1,0 +1,6 @@
+MongoDB methods:
+
+create - POST [returns one obj]
+find - GET [returns array]
+findById - GET/:id [returns one obj]
+

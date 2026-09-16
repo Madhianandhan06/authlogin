@@ -1,7 +1,7 @@
-import React from 'react'
 import { useState } from 'react'
 
 const App = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || ''
 
   const [notify, setNotify] = useState('')
 
@@ -9,14 +9,11 @@ const App = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const [signup, setSignup] = useState(null)
   const [login, setLogin] = useState(null)
 
-  const [token, setToken] = useState('')
-
-  async function handleSignUp(params) {
+  async function handleSignUp() {
     try {
-      const res = await fetch('http://localhost:3000/signup',{
+      const res = await fetch(`${apiUrl}/signup`,{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -25,12 +22,8 @@ const App = () => {
       })
 
       const data = await res.json()
-      console.log(data);
-      
+      if (!res.ok) throw new Error(data.message)
       setNotify(`Welcome ${data.user.name}!`)
-      console.log(data.token);
-      
-      setToken(data.token)
     } catch (error) {
       setNotify(error.message)
     }
@@ -39,23 +32,22 @@ const App = () => {
 
   function setUpSignup(){
     setLogin(null)
-    setSignup(true)
   }
   function setupLogin(){
     setLogin(true)
   }
-  async function handleLogin(params) {
+  async function handleLogin() {
     try {
-      const res = await fetch('http://localhost:3000/login',{
+      const res = await fetch(`${apiUrl}/login`,{
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await res.json()
-      console.log(data);
-      
+      if (!res.ok) throw new Error(data.message)
       setNotify(`Welcome ${data.user.name}!`)
     } catch (error) {
       setNotify(error.message)
@@ -77,7 +69,7 @@ const App = () => {
       <br /><br />
 
       <button onClick={setUpSignup}>SignUp</button>
-      <button>LogIn</button>
+      <button onClick={handleLogin}>LogIn</button>
       <br /><br />
         </>
       ) : (
@@ -99,7 +91,7 @@ const App = () => {
 
       <div>
 
-        {!login && <button>SignUp</button>}
+        {!login && <button onClick={handleSignUp}>SignUp</button>}
         { !login && (<a style={{cursor: 'pointer'}} 
            role='button' 
            tabIndex={0} 

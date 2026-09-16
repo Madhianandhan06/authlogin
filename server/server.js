@@ -5,6 +5,7 @@ import { connectDB } from "./config/db.js";
 import User from "./models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt'
+dotenv.config({ path: new URL('../.env', import.meta.url) });
 dotenv.config();
 
 const app = express();
@@ -160,9 +161,17 @@ app.post('/signup', async (req, res) => {
 function auth(req, res, next){
   const authHeader = req.headers.authorization
 
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Token missing' })
+  }
+
   const token = authHeader.split(' ')[1]
 
-  req.user = jwt.verify(token, JWT_SECRET)
+  try {
+    req.user = jwt.verify(token, JWT_SECRET)
+  } catch {
+    return res.status(401).json({ message: 'Invalid token' })
+  }
 
   next()
 }
@@ -192,6 +201,11 @@ app.post('/login', async (req, res) => {
   })
 })
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+if (process.env.NODE_ENV !== 'production' || process.env.RENDER) {
+  const port = process.env.PORT || 3000
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`)
+  })
+}
+
+export default app

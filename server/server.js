@@ -111,7 +111,7 @@ app.get('/', (req, res) => {
 //   res.json(user);
 // });
 
-app.post('/signup', async (req, res) => {
+app.post('/api/signup', async (req, res) => {
   const email = req.body.email?.trim().toLowerCase()
   const name = req.body.name?.trim()
   const { password } = req.body
@@ -175,7 +175,7 @@ function auth(req, res, next){
 
   next()
 }
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
 
   const email = req.body.email?.trim().toLowerCase();
   const { password } = req.body;
@@ -196,8 +196,15 @@ app.post('/login', async (req, res) => {
   const safeUser = user.toObject();
   delete safeUser.password;
 
+  const token = jwt.sign(
+    { email: user.email },
+    JWT_SECRET,
+    { expiresIn: '1d' }
+  )
+
   res.status(200).json({
-    user: safeUser
+    user: safeUser,
+    token
   })
 })
 
